@@ -62,19 +62,28 @@ def adj_sent_clust(text, threshold=0.3):
             sents_div, vecs_div = process(cluster_txt)
             reclusters = cluster_text(sents_div, vecs_div, threshold)
             
+            reserve2 = ''
             for subcluster in reclusters:
                 div_txt = clean_text(' '.join([sents_div[i].text for i in subcluster]))
                 div_len = len(div_txt)
                 
-                if div_len < 60 or div_len > 3000:
-                    continue
-                
-                clusters_lens.append(div_len)
-                final_texts.append(div_txt)
+                if div_len + len(reserve2) >= 600:
+                    final_texts.append(reserve2 + div_txt)
+                    clusters_lens.append(div_len + len(reserve2))
+                    reserve2 = ''
+                else:
+                    reserve2 += div_txt
+
+            if reserve2 != '':
+                final_texts.append(reserve2)
+                clusters_lens.append(len(reserve2))
                 
         else:
             clusters_lens.append(cluster_len)
             final_texts.append(cluster_txt)
 
+    if reserve != '':
+        final_texts.append(reserve)
+        clusters_lens.append(len(reserve))
     return final_texts
 
